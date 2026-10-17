@@ -1,1 +1,1 @@
-﻿Repositorio GitHub: https://github.com/karinahoyos867-lgtm/mariana-pets
+﻿Repositorio GitHub: https://github.com/karinahoyos867-lgtm/mariana-pets-springboot
