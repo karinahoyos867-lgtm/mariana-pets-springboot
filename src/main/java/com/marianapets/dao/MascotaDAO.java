@@ -14,21 +14,9 @@ import java.util.Map;
 
 /**
  * Gestiona las operaciones de acceso a datos de las mascotas.
- * Centraliza las consultas SQL y utiliza la conexión JDBC existente.
  */
 public class MascotaDAO {
 
-    /**
-     * Registra una mascota en la base de datos.
-     *
-     * @param nombre nombre de la mascota
-     * @param especie especie de la mascota
-     * @param raza raza de la mascota
-     * @param edad edad de la mascota
-     * @param propietario nombre de su propietario
-     * @return true si la mascota fue registrada
-     * @throws SQLException si ocurre un error de base de datos
-     */
     public boolean registrar(String nombre, String especie, String raza,
                              int edad, String propietario)
             throws SQLException {
@@ -50,14 +38,7 @@ public class MascotaDAO {
         }
     }
 
-    /**
-     * Consulta todas las mascotas ordenadas por su identificador.
-     *
-     * @return lista de mascotas con sus datos
-     * @throws SQLException si ocurre un error de base de datos
-     */
     public List<Map<String, Object>> listar() throws SQLException {
-
         List<Map<String, Object>> mascotas = new ArrayList<>();
 
         String sql = "SELECT id, nombre, especie, raza, edad, propietario "
@@ -68,20 +49,75 @@ public class MascotaDAO {
              ResultSet resultados = consulta.executeQuery()) {
 
             while (resultados.next()) {
-                Map<String, Object> mascota = new LinkedHashMap<>();
-
-                mascota.put("id", resultados.getInt("id"));
-                mascota.put("nombre", resultados.getString("nombre"));
-                mascota.put("especie", resultados.getString("especie"));
-                mascota.put("raza", resultados.getString("raza"));
-                mascota.put("edad", resultados.getInt("edad"));
-                mascota.put("propietario",
-                        resultados.getString("propietario"));
-
-                mascotas.add(mascota);
+                mascotas.add(mapearMascota(resultados));
             }
         }
 
         return mascotas;
+    }
+
+    public Map<String, Object> buscarPorId(int id) throws SQLException {
+        String sql = "SELECT id, nombre, especie, raza, edad, propietario "
+                + "FROM mascotas WHERE id = ?";
+
+        try (Connection conexion = Conexion.conectar();
+             PreparedStatement consulta = conexion.prepareStatement(sql)) {
+
+            consulta.setInt(1, id);
+
+            try (ResultSet resultados = consulta.executeQuery()) {
+                if (resultados.next()) {
+                    return mapearMascota(resultados);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public boolean actualizar(int id, String nombre, String especie,
+                              String raza, int edad, String propietario)
+            throws SQLException {
+
+        String sql = "UPDATE mascotas SET nombre = ?, especie = ?, "
+                + "raza = ?, edad = ?, propietario = ? WHERE id = ?";
+
+        try (Connection conexion = Conexion.conectar();
+             PreparedStatement consulta = conexion.prepareStatement(sql)) {
+
+            consulta.setString(1, nombre);
+            consulta.setString(2, especie);
+            consulta.setString(3, raza);
+            consulta.setInt(4, edad);
+            consulta.setString(5, propietario);
+            consulta.setInt(6, id);
+
+            return consulta.executeUpdate() > 0;
+        }
+    }
+
+    public boolean eliminar(int id) throws SQLException {
+        String sql = "DELETE FROM mascotas WHERE id = ?";
+
+        try (Connection conexion = Conexion.conectar();
+             PreparedStatement consulta = conexion.prepareStatement(sql)) {
+
+            consulta.setInt(1, id);
+            return consulta.executeUpdate() > 0;
+        }
+    }
+
+    private Map<String, Object> mapearMascota(ResultSet resultados)
+            throws SQLException {
+
+        Map<String, Object> mascota = new LinkedHashMap<>();
+        mascota.put("id", resultados.getInt("id"));
+        mascota.put("nombre", resultados.getString("nombre"));
+        mascota.put("especie", resultados.getString("especie"));
+        mascota.put("raza", resultados.getString("raza"));
+        mascota.put("edad", resultados.getInt("edad"));
+        mascota.put("propietario", resultados.getString("propietario"));
+
+        return mascota;
     }
 }

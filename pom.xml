@@ -20,9 +20,11 @@
     <name>Mariana Pets</name>
     <description>Aplicación web de gestión de mascotas con Spring Boot y MySQL</description>
 
-    <properties>
-        <java.version>21</java.version>
-    </properties>
+   <properties>
+    <java.version>21</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+</properties>
 
     <dependencies>
         <dependency>
